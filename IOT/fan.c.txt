@@ -1,0 +1,49 @@
+#include <LiquidCrystal.h>  
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+// Creates an LCD object. Parameters: (RS,EN,D4,D5,D6,D7 )
+#include <Servo.h>
+Servo myservo; // create servo object to control a servo
+const int trigPin = 6;
+const int echoPin = 7;
+void setup() {
+Serial.begin(9600); // initialize serial communication
+myservo.attach(9); // attaches the servo on pin 9 to the servo object
+}
+void loop() {
+long duration, cm;
+pinMode(13, OUTPUT); 
+pinMode(trigPin, OUTPUT);
+digitalWrite(trigPin, LOW);
+delayMicroseconds(2);
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(20);
+digitalWrite(trigPin, LOW); 
+pinMode(echoPin, INPUT); 
+duration = pulseIn(echoPin, HIGH); 
+cm = microsecondsToCentimeters(duration); // convert time to distance
+if ( cm > 100 && cm < 150)
+{ 
+digitalWrite(13, HIGH); 
+myservo.write(90);
+delay(10); 
+}
+else
+{ 
+digitalWrite(13, LOW); 
+myservo.write(0);
+delay(10); 
+}
+Serial.print(cm);
+Serial.print("cm");
+Serial.println();
+delay(10); 
+lcd.setCursor(0,1); 
+lcd.print("Dist: "); 
+lcd.print(cm);
+lcd.print(" cm"); 
+delay(50);
+}
+
+long microsecondsToCentimeters(long microseconds) { 
+return microseconds / 29 / 2; 
+}

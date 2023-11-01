@@ -1,0 +1,68 @@
+#define BLYNK_TEMPLATE_ID "TMPL3EzT0tWpF"
+#define BLYNK_TEMPLATE_NAME "Soil Moisture"
+
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <SimpleTimer.h>
+#include "BlynkEdgent.h"
+
+SimpleTimer timer;
+
+
+#define BLYNK_AUTH_TOKEN "bioLx5ycnxXP5UzCGgwXtsvjVOE1y6qf"
+
+float moisture_percentage;
+const int sensor_pin = A0; /* Soil moisture sensor O/P pin */
+
+// This function sends Arduino's uptime every second to Virtual Pin 2.
+void myTimerEvent()
+{
+// You can send any value at any time.
+// Please don't send more that 10 values per second.
+Blynk.virtualWrite(V2, millis() / 1000);
+}
+void sendSensor()
+{
+Blynk.virtualWrite(V0, moisture_percentage);
+}
+
+
+void setup()
+{
+// Debug console
+Serial.begin(115200);
+BlynkEdgent.begin();
+delay(1000);
+
+
+// Setup a function to be called every second
+timer.setInterval(1000L, sendSensor);
+//The L declares that the value is a long.
+//Without the L, the value of duration * 1000 would be interpreted as an int, which can hold a maximum value of 32,767, limiting duration to a maximum of 32.
+//With the L, duration * 1000L is treated as a long, which can hold a much larger value.
+}
+
+
+void loop()
+{
+BlynkEdgent.run();
+timer.run(); // Initiates SimpleTimer
+moisture_percentage = ( 100 - ((analogRead(A0)/1023.00) * 100));
+if ( moisture_percentage > 30)
+{
+digitalWrite(8, HIGH); //D0
+Serial.println("does not need water");
+delay(1000);
+}
+else
+{
+digitalWrite(8, LOW); //D0
+Serial.println("needs water, send notification");
+// Blynk.notify("Water your plants");
+delay(1000);
+}
+Serial.print("Moisture Percentage = ");
+Serial.print(moisture_percentage);
+Serial.print("%\n");
+delay(1000);
+}
